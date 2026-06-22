@@ -145,7 +145,7 @@
   <ItemGroup>
     <ClCompile Include="benchmarks.cpp" />
     <ClCompile Include="filters_sequential.cpp" />
-    <ClCompile Include="ImageProcessing.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="image_io.cpp" />
   </ItemGroup>
   <ItemGroup>
