@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="ImageProcessing/ImageProcessing.vcxproj" />
+  <Project Path="ImageProcessing/ImageProcessing.vcxproj" Id="3287ef51-9455-412d-b633-a7ac5a20eb73" />
 </Solution>
