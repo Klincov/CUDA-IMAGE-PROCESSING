@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 
-cv::Mat loadImage(const std::string& path, bool grayscale) {
+cv::Mat loadImageCV(const std::string& path, bool grayscale) {
     int flag = grayscale ? cv::IMREAD_GRAYSCALE : cv::IMREAD_COLOR;
     cv::Mat image = cv::imread(path, flag);
 
@@ -13,7 +13,7 @@ cv::Mat loadImage(const std::string& path, bool grayscale) {
     return image;
 }
 
-void saveImage(const std::string& path, const cv::Mat& image) {
+void saveImageCV(const std::string& path, const cv::Mat& image) {
     if (image.empty()) {
         throw std::runtime_error("Cannot save empty image to: " + path);
     }
