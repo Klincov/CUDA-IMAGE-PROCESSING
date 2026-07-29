@@ -11,6 +11,9 @@
 
 #define OUTPUT_PATH "C:\\Users\\mihaj\\OneDrive\\Desktop"
 
+void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>> &filters, const cv::Mat& image);
+void printFilterMenu();
+void filterMenu(const cv::Mat& image);
 char* browsePath();
 void printMenu();
 int saveImage(const cv::Mat& image);
@@ -43,9 +46,13 @@ int main()
             case 3:
                 saveImage(loadedImage);
                 break;
+            case 4: 
+                filterMenu(loadedImage);
+                break;
             case 0:
                 return 1;
             default:
+                std::cout << "Invalid input" << std::endl;
                 break;
             }
         }
@@ -56,13 +63,66 @@ int main()
     return 0;
 }
 
+void filterMenu(const cv::Mat& image) {
+    cv::Mat original = image.clone();
+    cv::Mat result = image.clone();
+    while (1) {
+        printImageInfo(original);
+        printFilterMenu();
+        std::vector<std::unique_ptr<IFilter>> filters;
+
+        int input;
+        std::cin >> input;
+        switch (input) {
+        case 1:
+            filters.push_back(std::make_unique<InvertFilterSeq>());
+            filters.push_back(std::make_unique<InvertFilterOMP>());
+            filters.push_back(std::make_unique<InvertFilterCUDA>());
+            implementationChoiceMenu(filters, original);
+            break;
+        case 0:
+            return;
+        default:
+            std::cout << "Invalid input" << std::endl;
+            break;
+        }
+    }
+}
+
+void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>>& filters, const cv::Mat& image){
+    std::cout << "\nChoose Implementation:" << std::endl;
+    std::cout << "1.Sequential" << std::endl;
+    std::cout << "2.OpenMP" << std::endl;
+    std::cout << "3.CUDA" << std::endl << std::endl;
+
+    std::cout << "\nInput: " << std::endl;
+    int input;
+    std::cin >> input;
+    if (input < 1 || input > 3) {
+        std::cout << "Invalid input!" << std::endl;
+        return;
+    }
+    cv::imshow("Filter applied!", filters[input - 1]->apply(image));
+    cv::waitKey(0);
+    cv::destroyAllWindows();
+}
+
 void printMenu() {
     std::cout << "Options:" << std::endl;
     std::cout << "\t1.Preview image" << std::endl;
     std::cout << "\t2.Load image" << std::endl;
     std::cout << "\t3.Save image" << std::endl;
-    std::cout << "\t4.Filter list" << std::endl << std::endl;
-    std::cout << "\t0.Exit" << std::endl;
+    std::cout << "\t4.Filter test" << std::endl;
+    std::cout << "\t5.Run benchmark" << std::endl;
+    std::cout << "\t0.Exit" << std::endl << std::endl;
+
+    std::cout << "\nInput: " << std::endl;
+}
+
+void printFilterMenu() {
+    std::cout << "Options:" << std::endl;
+    std::cout << "\t1.Invert color" << std::endl;
+    std::cout << "\t0.Back" << std::endl << std::endl;
 
     std::cout << "\nInput: " << std::endl;
 }
