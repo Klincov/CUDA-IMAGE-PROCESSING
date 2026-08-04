@@ -52,7 +52,7 @@ int main()
                     break;
                 saveImage(loadedImage);
                 break;
-            case 4:
+            case 4: 
                 if (loadedImage.size().height <= 0)
                     break;
                 filterMenu(loadedImage);
