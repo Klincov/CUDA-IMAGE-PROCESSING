@@ -31,7 +31,7 @@ file(GLOB_RECURSE SOURCES
     "${CMAKE_SOURCE_DIR}/src/*.cu"
 )
 
-add_executable(filter_bench ${SOURCES} "src/app/image_io.cpp" "src/app/image_io.h")
+add_executable(filter_bench ${SOURCES} "src/app/image_io.cpp" "src/app/image_io.h" "src/filters/sequential/GaussianBlurFilterSeq.h")
 
 target_include_directories(filter_bench PRIVATE
     ${CMAKE_SOURCE_DIR}/src

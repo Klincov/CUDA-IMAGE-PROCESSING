@@ -5,9 +5,13 @@
 #include <commdlg.h>//file browse
 #include "core/IFilter.h"
 #include "image_io.h"
+
 #include "filters/sequential/InvertFilterSeq.h"
 #include "filters/openmp/InvertFilterOMP.h"
 #include "filters/cuda/InvertFilterCUDA.h"
+
+#include "filters/sequential/GaussianBlurFilterSeq.h"
+
 
 #define OUTPUT_PATH "C:\\Users\\mihaj\\OneDrive\\Desktop"
 
@@ -44,9 +48,13 @@ int main()
                 loadedImage = loadImage();
                 break;
             case 3:
+                if (loadedImage.size().height <= 0)
+                    break;
                 saveImage(loadedImage);
                 break;
             case 4: 
+                if (loadedImage.size().height <= 0)
+                    break;
                 filterMenu(loadedImage);
                 break;
             case 0:
@@ -76,6 +84,12 @@ void filterMenu(const cv::Mat& image) {
         switch (input) {
         case 1:
             filters.push_back(std::make_unique<InvertFilterSeq>());
+            filters.push_back(std::make_unique<InvertFilterOMP>());
+            filters.push_back(std::make_unique<InvertFilterCUDA>());
+            implementationChoiceMenu(filters, original);
+            break;
+        case 2:
+            filters.push_back(std::make_unique<GaussianBlurFilterSeq>());
             filters.push_back(std::make_unique<InvertFilterOMP>());
             filters.push_back(std::make_unique<InvertFilterCUDA>());
             implementationChoiceMenu(filters, original);
@@ -122,6 +136,7 @@ void printMenu() {
 void printFilterMenu() {
     std::cout << "Options:" << std::endl;
     std::cout << "\t1.Invert color" << std::endl;
+    std::cout << "\t2.Gaussian blur" << std::endl;
     std::cout << "\t0.Back" << std::endl << std::endl;
 
     std::cout << "\nInput: " << std::endl;
