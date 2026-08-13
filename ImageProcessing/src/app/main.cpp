@@ -12,6 +12,7 @@
 
 #include "filters/sequential/GaussianBlurFilterSeq.h"
 #include "filters/openmp/GaussianBlurFilterOMP.h"
+#include "filters/cuda/GaussianBlurFilterCUDA.h"
 
 
 #define OUTPUT_PATH "C:\\Users\\mihaj\\OneDrive\\Desktop"
@@ -92,7 +93,7 @@ void filterMenu(const cv::Mat& image) {
         case 2:
             filters.push_back(std::make_unique<GaussianBlurFilterSeq>());
             filters.push_back(std::make_unique<GaussianBlurFilterOMP>());
-            filters.push_back(std::make_unique<InvertFilterCUDA>());
+            filters.push_back(std::make_unique<GaussianBlurFilterCUDA>());
             implementationChoiceMenu(filters, original);
             break;
         case 0:
