@@ -15,6 +15,7 @@
 #include "filters/cuda/GaussianBlurFilterCUDA.h"
 
 #include "filters/sequential/SobelFilterSeq.h"
+#include "filters/openmp/SobelFilterOMP.h"
 
 
 
@@ -101,7 +102,7 @@ void filterMenu(const cv::Mat& image) {
             break;
         case 3:
             filters.push_back(std::make_unique<SobelFilterSeq>());
-            filters.push_back(std::make_unique<InvertFilterOMP>());
+            filters.push_back(std::make_unique<SobelFilterOMP>());
             filters.push_back(std::make_unique<InvertFilterCUDA>());
             implementationChoiceMenu(filters, original);
             break;
