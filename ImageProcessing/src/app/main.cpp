@@ -14,6 +14,9 @@
 #include "filters/openmp/GaussianBlurFilterOMP.h"
 #include "filters/cuda/GaussianBlurFilterCUDA.h"
 
+#include "filters/sequential/SobelFilterSeq.h"
+
+
 
 #define OUTPUT_PATH "C:\\Users\\mihaj\\OneDrive\\Desktop"
 
@@ -96,6 +99,12 @@ void filterMenu(const cv::Mat& image) {
             filters.push_back(std::make_unique<GaussianBlurFilterCUDA>());
             implementationChoiceMenu(filters, original);
             break;
+        case 3:
+            filters.push_back(std::make_unique<SobelFilterSeq>());
+            filters.push_back(std::make_unique<InvertFilterOMP>());
+            filters.push_back(std::make_unique<InvertFilterCUDA>());
+            implementationChoiceMenu(filters, original);
+            break;
         case 0:
             return;
         default:
@@ -139,6 +148,7 @@ void printFilterMenu() {
     std::cout << "Options:" << std::endl;
     std::cout << "\t1.Invert color" << std::endl;
     std::cout << "\t2.Gaussian blur" << std::endl;
+    std::cout << "\t3.Sobel filter" << std::endl;
     std::cout << "\t0.Back" << std::endl << std::endl;
 
     std::cout << "\nInput: " << std::endl;
