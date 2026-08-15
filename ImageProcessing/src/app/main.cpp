@@ -16,6 +16,7 @@
 
 #include "filters/sequential/SobelFilterSeq.h"
 #include "filters/openmp/SobelFilterOMP.h"
+#include "filters/cuda/SobelFilterCUDA.h"
 
 
 
@@ -103,7 +104,7 @@ void filterMenu(const cv::Mat& image) {
         case 3:
             filters.push_back(std::make_unique<SobelFilterSeq>());
             filters.push_back(std::make_unique<SobelFilterOMP>());
-            filters.push_back(std::make_unique<InvertFilterCUDA>());
+            filters.push_back(std::make_unique<SobelFilterCUDA>());
             implementationChoiceMenu(filters, original);
             break;
         case 0:
