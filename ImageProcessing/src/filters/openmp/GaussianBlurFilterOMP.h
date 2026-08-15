@@ -24,7 +24,7 @@ public:
         return output;
     }
 
-    std::string name() const override { return "Invert (OpenMP)"; }
+    std::string name() const override { return "Gaussian Blur (OpenMP)"; }
 private:
     void calculateNewRGB(const cv::Mat& input, cv::Mat& output, int col, int row, const int kernel[5][5]) {
         int newB = 0;
