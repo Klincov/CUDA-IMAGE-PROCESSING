@@ -18,13 +18,15 @@
 #include "filters/openmp/SobelFilterOMP.h"
 #include "filters/cuda/SobelFilterCUDA.h"
 
+#include "filters/sequential/UnsharpMaskingFilterSeq.h"
+
 
 
 #define OUTPUT_PATH "C:\\Users\\mihaj\\OneDrive\\Desktop"
 
-void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>> &filters, const cv::Mat& image);
+void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>> &filters, cv::Mat& image);
 void printFilterMenu();
-void filterMenu(const cv::Mat& image);
+void filterMenu(cv::Mat& image);
 char* browsePath();
 void printMenu();
 int saveImage(const cv::Mat& image);
@@ -78,11 +80,9 @@ int main()
     return 0;
 }
 
-void filterMenu(const cv::Mat& image) {
-    cv::Mat original = image.clone();
-    cv::Mat result = image.clone();
+void filterMenu(cv::Mat& image) {
     while (1) {
-        printImageInfo(original);
+        printImageInfo(image);
         printFilterMenu();
         std::vector<std::unique_ptr<IFilter>> filters;
 
@@ -93,19 +93,25 @@ void filterMenu(const cv::Mat& image) {
             filters.push_back(std::make_unique<InvertFilterSeq>());
             filters.push_back(std::make_unique<InvertFilterOMP>());
             filters.push_back(std::make_unique<InvertFilterCUDA>());
-            implementationChoiceMenu(filters, original);
+            implementationChoiceMenu(filters, image);
             break;
         case 2:
             filters.push_back(std::make_unique<GaussianBlurFilterSeq>());
             filters.push_back(std::make_unique<GaussianBlurFilterOMP>());
             filters.push_back(std::make_unique<GaussianBlurFilterCUDA>());
-            implementationChoiceMenu(filters, original);
+            implementationChoiceMenu(filters, image);
             break;
         case 3:
             filters.push_back(std::make_unique<SobelFilterSeq>());
             filters.push_back(std::make_unique<SobelFilterOMP>());
             filters.push_back(std::make_unique<SobelFilterCUDA>());
-            implementationChoiceMenu(filters, original);
+            implementationChoiceMenu(filters, image);
+            break;
+        case 4:
+            filters.push_back(std::make_unique<UnsharpMaskingFilterSeq>());
+            filters.push_back(std::make_unique<SobelFilterOMP>());
+            filters.push_back(std::make_unique<SobelFilterCUDA>());
+            implementationChoiceMenu(filters, image);
             break;
         case 0:
             return;
@@ -116,7 +122,7 @@ void filterMenu(const cv::Mat& image) {
     }
 }
 
-void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>>& filters, const cv::Mat& image){
+void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>>& filters, cv::Mat& image){
     std::cout << "\nChoose Implementation:" << std::endl;
     std::cout << "1.Sequential" << std::endl;
     std::cout << "2.OpenMP" << std::endl;
@@ -129,9 +135,19 @@ void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>>& filte
         std::cout << "Invalid input!" << std::endl;
         return;
     }
-    cv::imshow("Filter applied!", filters[input - 1]->apply(image));
+    cv::Mat applied = filters[input - 1]->apply(image);
+    cv::imshow("Filter applied!", applied);
     cv::waitKey(0);
     cv::destroyAllWindows();
+
+    std::cout << "\nSave?(Y/N)" << std::endl;
+
+    std::cout << "\nInput: " << std::endl;
+    char save = 0;
+    std::cin >> save;
+    if (save == 'Y' || save == 'y') image = applied.clone();
+    else return;
+
 }
 
 void printMenu() {
@@ -151,6 +167,7 @@ void printFilterMenu() {
     std::cout << "\t1.Invert color" << std::endl;
     std::cout << "\t2.Gaussian blur" << std::endl;
     std::cout << "\t3.Sobel filter" << std::endl;
+    std::cout << "\t4.Unsharp masking filter" << std::endl;
     std::cout << "\t0.Back" << std::endl << std::endl;
 
     std::cout << "\nInput: " << std::endl;
