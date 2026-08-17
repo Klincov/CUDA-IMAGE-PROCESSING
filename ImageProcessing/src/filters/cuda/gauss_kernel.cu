@@ -1,6 +1,5 @@
 #include "gauss_kernel.cuh"
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
+#include "gauss_kernel_internal.cuh"  
 
 //constant memorija je kesirana i broadcast-uje se svim nitima u warpu
 __constant__ int d_kernel[25] = {
@@ -10,10 +9,6 @@ __constant__ int d_kernel[25] = {
     4, 16, 26, 16, 4,
     1,  4,  7,  4, 1
 };
-
-__device__ __forceinline__ int clampInt(int v, int lo, int hi) {
-    return v < lo ? lo : (v > hi ? hi : v);
-}
 
 __global__ void gaussKernel(const unsigned char* input, unsigned char* output,
     int width, int height, int channels) {
