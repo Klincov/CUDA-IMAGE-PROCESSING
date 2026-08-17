@@ -20,6 +20,8 @@
 
 #include "filters/sequential/UnsharpMaskingFilterSeq.h"
 #include "filters/openmp/UnsharpMaskingFilterOMP.h"
+#include "filters/cuda/UnsharpMaskingFilterCUDA.h"
+
 
 
 #define OUTPUT_PATH "C:\\Users\\mihaj\\OneDrive\\Desktop"
@@ -110,7 +112,7 @@ void filterMenu(cv::Mat& image) {
         case 4:
             filters.push_back(std::make_unique<UnsharpMaskingFilterSeq>());
             filters.push_back(std::make_unique<UnsharpMaskingFilterOMP>());
-            filters.push_back(std::make_unique<SobelFilterCUDA>());
+            filters.push_back(std::make_unique<UnsharpMaskingFilterCUDA>());
             implementationChoiceMenu(filters, image);
             break;
         case 0:
