@@ -22,6 +22,8 @@
 #include "filters/openmp/UnsharpMaskingFilterOMP.h"
 #include "filters/cuda/UnsharpMaskingFilterCUDA.h"
 
+#include "filters/sequential/HistogramEqualization.h"
+
 
 
 #define OUTPUT_PATH "C:\\Users\\mihaj\\OneDrive\\Desktop"
@@ -115,6 +117,13 @@ void filterMenu(cv::Mat& image) {
             filters.push_back(std::make_unique<UnsharpMaskingFilterCUDA>());
             implementationChoiceMenu(filters, image);
             break;
+        case 5:
+            filters.push_back(std::make_unique<HistogramEqualizationSeq>());
+            filters.push_back(std::make_unique<UnsharpMaskingFilterOMP>());
+            filters.push_back(std::make_unique<UnsharpMaskingFilterCUDA>());
+            implementationChoiceMenu(filters, image);
+            break;
+
         case 0:
             return;
         default:
@@ -170,6 +179,7 @@ void printFilterMenu() {
     std::cout << "\t2.Gaussian blur" << std::endl;
     std::cout << "\t3.Sobel filter" << std::endl;
     std::cout << "\t4.Unsharp masking filter" << std::endl;
+    std::cout << "\t5.Histogram Equalization" << std::endl;
     std::cout << "\t0.Back" << std::endl << std::endl;
 
     std::cout << "\nInput: " << std::endl;
