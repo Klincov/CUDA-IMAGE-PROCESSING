@@ -49,7 +49,12 @@ int main()
             printMenu();
 
             int input;
-            std::cin >> input;
+            if (!(std::cin >> input)) {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Invalid input" << std::endl;
+                continue;
+            }
 
             switch (input) {
             case 1:
@@ -93,7 +98,13 @@ void filterMenu(cv::Mat& image) {
         std::vector<std::unique_ptr<IFilter>> filters;
 
         int input;
-        std::cin >> input;
+        if (!(std::cin >> input)) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input" << std::endl;
+            continue; 
+        }
+
         switch (input) {
         case 1:
             filters.push_back(std::make_unique<InvertFilterSeq>());
@@ -148,6 +159,7 @@ void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>>& filte
         std::cout << "Invalid input!" << std::endl;
         return;
     }
+
     cv::Mat applied = filters[input - 1]->apply(image);
     cv::imshow("Filter applied!", applied);
     cv::waitKey(0);
