@@ -22,8 +22,9 @@
 #include "filters/openmp/UnsharpMaskingFilterOMP.h"
 #include "filters/cuda/UnsharpMaskingFilterCUDA.h"
 
-#include "filters/sequential/HistogramEqualization.h"
-#include "filters/openmp/HistogramEqualization.h"
+#include "filters/sequential/HistogramEqualizationSeq.h"
+#include "filters/openmp/HistogramEqualizationOMP.h"
+#include "filters/cuda/HistogramEqualizationCUDA.h"
 
 
 
@@ -133,7 +134,7 @@ void filterMenu(cv::Mat& image) {
         case 5:
             filters.push_back(std::make_unique<HistogramEqualizationSeq>());
             filters.push_back(std::make_unique<HistogramEqualizationOMP>());
-            filters.push_back(std::make_unique<UnsharpMaskingFilterCUDA>());
+            filters.push_back(std::make_unique<HistogramEqualizationCUDA>());
             implementationChoiceMenu(filters, image);
             break;
 
