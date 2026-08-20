@@ -7,7 +7,7 @@ class GaussianBlurFilterCUDA : public IFilter {
 public:
     cv::Mat apply(const cv::Mat& input) override {
         // cv::Mat.data mora biti continuous da bi indeksiranje (row*width+col)
-        // u kernelu bilo validno (bez "rupa" izmedju redova zbog stride-a).
+        // u kernelu bilo validno
         cv::Mat continuousInput = input.isContinuous() ? input : input.clone();
  
         cv::Mat output(input.size(), input.type());
