@@ -10,8 +10,14 @@ public:
         cv::cvtColor(continuousInput, inputGray, cv::COLOR_BGR2GRAY);
         cv::Mat output = inputGray.clone();
 
-        launchSobelFilterKernel(inputGray.data, output.data, output.cols, output.rows);
-        return output;
+        try{
+            launchSobelFilterKernel(inputGray.data, output.data, output.cols, output.rows);
+            return output;
+        }
+        catch (const std::exception& e) {
+            std::cerr << "Filter failed: " << e.what() << std::endl;
+            throw e;
+        }
     }
 
     std::string name() const override { return "Sobel (CUDA)"; }

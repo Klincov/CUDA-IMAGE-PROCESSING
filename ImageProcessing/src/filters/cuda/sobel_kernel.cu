@@ -1,6 +1,7 @@
 #include "sobel_kernel.cuh"
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+#include "core/CudaCheck.cuh"
 
 //constant memorija je kesirana i broadcast-uje se svim nitima u warpu
 __constant__ int G_x[9] = { -1, 0, 1,
@@ -62,10 +63,10 @@ void launchSobelFilterKernel(const unsigned char* h_input, unsigned char* h_outp
     unsigned char* d_input = nullptr;
     unsigned char* d_output = nullptr;
 
-    cudaMalloc(&d_input, totalBytes);
-    cudaMalloc(&d_output, totalBytes);
+    CUDA_CHECK(cudaMalloc(&d_input, totalBytes));
+    CUDA_CHECK(cudaMalloc(&d_output, totalBytes));
 
-    cudaMemcpy(d_input, h_input, totalBytes, cudaMemcpyHostToDevice);
+    CUDA_CHECK(cudaMemcpy(d_input, h_input, totalBytes, cudaMemcpyHostToDevice));
 
     dim3 threadsPerBlock(16, 16);
     dim3 blocks(
@@ -74,10 +75,11 @@ void launchSobelFilterKernel(const unsigned char* h_input, unsigned char* h_outp
     );
 
     sobelKernel << <blocks, threadsPerBlock >> > (d_input, d_output, width, height);
-    cudaDeviceSynchronize();
+    CUDA_CHECK_LAST_ERROR();
+    CUDA_CHECK(cudaDeviceSynchronize());
 
-    cudaMemcpy(h_output, d_output, totalBytes, cudaMemcpyDeviceToHost);
+    CUDA_CHECK(cudaMemcpy(h_output, d_output, totalBytes, cudaMemcpyDeviceToHost));
 
-    cudaFree(d_input);
-    cudaFree(d_output);
+    CUDA_CHECK(cudaFree(d_input));
+    CUDA_CHECK(cudaFree(d_output));
 }

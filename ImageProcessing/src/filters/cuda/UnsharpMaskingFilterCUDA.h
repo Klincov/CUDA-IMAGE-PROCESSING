@@ -11,14 +11,20 @@ public:
 
         cv::Mat output(input.size(), input.type());
 
-        launchUnsharpMaskingKernel(
-            continuousInput.data,
-            output.data,
-            input.cols,
-            input.rows,
-            input.channels(),
-            2
-        );
+        try {
+            launchUnsharpMaskingKernel(
+                continuousInput.data,
+                output.data,
+                input.cols,
+                input.rows,
+                input.channels(),
+                2
+            );
+        }
+        catch (const std::exception& e) {
+            std::cerr << "Filter failed: " << e.what() << std::endl;
+            throw e;
+        }
 
         return output;
     }

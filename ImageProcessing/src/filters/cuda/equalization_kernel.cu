@@ -1,6 +1,7 @@
 #include "equalization_kernel.cuh"
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+#include "core/CudaCheck.cuh"
 
 #define GRAY_LEVELS 256
 
@@ -54,23 +55,25 @@ void launchHistogramEqualizationKernel(const unsigned char* h_input, unsigned ch
     unsigned char* d_input, * d_output;
     int* d_histogram, * d_cumSum;
 
-    cudaMalloc(&d_input, totalPixels);
-    cudaMalloc(&d_output, totalPixels);
-    cudaMalloc(&d_histogram, GRAY_LEVELS * sizeof(int));
-    cudaMalloc(&d_cumSum, GRAY_LEVELS * sizeof(int));
-    cudaMemset(d_histogram, 0, GRAY_LEVELS * sizeof(int));
+    CUDA_CHECK(cudaMalloc(&d_input, totalPixels));
+    CUDA_CHECK(cudaMalloc(&d_output, totalPixels));
+    CUDA_CHECK(cudaMalloc(&d_histogram, GRAY_LEVELS * sizeof(int)));
+    CUDA_CHECK(cudaMalloc(&d_cumSum, GRAY_LEVELS * sizeof(int)));
+    CUDA_CHECK(cudaMemset(d_histogram, 0, GRAY_LEVELS * sizeof(int)));
 
-    cudaMemcpy(d_input, h_input, totalPixels, cudaMemcpyHostToDevice);
+    CUDA_CHECK(cudaMemcpy(d_input, h_input, totalPixels, cudaMemcpyHostToDevice));
 
     dim3 threadsPerBlock(16, 16);
     dim3 blocks((width + 15) / 16, (height + 15) / 16);
 
     // Faza 1: histogram (GPU)
     histogramKernel << <blocks, threadsPerBlock >> > (d_input, d_histogram, width, height);
+    CUDA_CHECK_LAST_ERROR();
+    CUDA_CHECK(cudaDeviceSynchronize());
 
     // Faza 2: cumsum preko cpu jer je 256 elemenata premalo za GPU
     int h_hist[GRAY_LEVELS];
-    cudaMemcpy(h_hist, d_histogram, GRAY_LEVELS * sizeof(int), cudaMemcpyDeviceToHost);
+    CUDA_CHECK(cudaMemcpy(h_hist, d_histogram, GRAY_LEVELS * sizeof(int), cudaMemcpyDeviceToHost));
 
     for (int i = 1; i < GRAY_LEVELS; i++)
         h_hist[i] += h_hist[i - 1];
@@ -80,14 +83,17 @@ void launchHistogramEqualizationKernel(const unsigned char* h_input, unsigned ch
         if (h_hist[i] > 0) { cumSumMin = h_hist[i]; break; }
     }
 
-    cudaMemcpy(d_cumSum, h_hist, GRAY_LEVELS * sizeof(int), cudaMemcpyHostToDevice);
+    CUDA_CHECK(cudaMemcpy(d_cumSum, h_hist, GRAY_LEVELS * sizeof(int), cudaMemcpyHostToDevice));
 
     // Faza 3: mapiranje (GPU)
     equalizeMapKernel << <blocks, threadsPerBlock >> > (d_input, d_output, d_cumSum, cumSumMin, totalPixels, width, height);
+    CUDA_CHECK_LAST_ERROR();
+    CUDA_CHECK(cudaDeviceSynchronize());
 
-    cudaDeviceSynchronize();
-    cudaMemcpy(h_output, d_output, totalPixels, cudaMemcpyDeviceToHost);
+    CUDA_CHECK(cudaMemcpy(h_output, d_output, totalPixels, cudaMemcpyDeviceToHost));
 
-    cudaFree(d_input); cudaFree(d_output);
-    cudaFree(d_histogram); cudaFree(d_cumSum);
+    CUDA_CHECK(cudaFree(d_input));
+    CUDA_CHECK(cudaFree(d_output));
+    CUDA_CHECK(cudaFree(d_histogram));
+    CUDA_CHECK(cudaFree(d_cumSum));
 }

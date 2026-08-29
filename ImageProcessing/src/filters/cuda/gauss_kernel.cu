@@ -1,5 +1,6 @@
 #include "gauss_kernel.cuh"
-#include "gauss_kernel_internal.cuh"  
+#include "gauss_kernel_internal.cuh"
+#include "core/CudaCheck.cuh"
 
 //constant memorija je kesirana i broadcast-uje se svim nitima u warpu
 __constant__ int d_kernel[25] = {
@@ -45,10 +46,10 @@ void launchGaussianBlurKernel(const unsigned char* h_input, unsigned char* h_out
     unsigned char* d_input = nullptr;
     unsigned char* d_output = nullptr;
 
-    cudaMalloc(&d_input, totalBytes);
-    cudaMalloc(&d_output, totalBytes);
+    CUDA_CHECK(cudaMalloc(&d_input, totalBytes));
+    CUDA_CHECK(cudaMalloc(&d_output, totalBytes));
 
-    cudaMemcpy(d_input, h_input, totalBytes, cudaMemcpyHostToDevice);
+    CUDA_CHECK(cudaMemcpy(d_input, h_input, totalBytes, cudaMemcpyHostToDevice));
 
     dim3 threadsPerBlock(16, 16);
     dim3 blocks(
@@ -57,10 +58,11 @@ void launchGaussianBlurKernel(const unsigned char* h_input, unsigned char* h_out
     );
 
     gaussKernel << <blocks, threadsPerBlock >> > (d_input, d_output, width, height, channels);
-    cudaDeviceSynchronize();
+    CUDA_CHECK_LAST_ERROR();
+    CUDA_CHECK(cudaDeviceSynchronize());
 
-    cudaMemcpy(h_output, d_output, totalBytes, cudaMemcpyDeviceToHost);
+    CUDA_CHECK(cudaMemcpy(h_output, d_output, totalBytes, cudaMemcpyDeviceToHost));
 
-    cudaFree(d_input);
-    cudaFree(d_output);
+    CUDA_CHECK(cudaFree(d_input));
+    CUDA_CHECK(cudaFree(d_output));
 }
