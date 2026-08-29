@@ -12,13 +12,19 @@ public:
  
         cv::Mat output(input.size(), input.type());
  
-        launchGaussianBlurKernel(
-            continuousInput.data,
-            output.data,
-            input.cols,
-            input.rows,
-            input.channels()
-        );
+        try{
+            launchGaussianBlurKernel(
+                continuousInput.data,
+                output.data,
+                input.cols,
+                input.rows,
+                input.channels()
+            );
+        }
+        catch (const std::exception& e) {
+            std::cerr << "Filter failed: " << e.what() << std::endl;
+            throw e;
+        }
  
         return output;
     }

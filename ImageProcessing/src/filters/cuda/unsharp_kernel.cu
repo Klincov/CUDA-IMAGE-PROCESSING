@@ -1,5 +1,6 @@
 #include "unsharp_kernel.cuh"
 #include "gauss_kernel_internal.cuh"
+#include "core/CudaCheck.cuh"
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
@@ -29,11 +30,11 @@ void launchUnsharpMaskingKernel(const unsigned char* h_input, unsigned char* h_o
     unsigned char* d_blurred = nullptr;
     unsigned char* d_output = nullptr;
 
-    cudaMalloc(&d_input, totalBytes);
-    cudaMalloc(&d_blurred, totalBytes);   // medjurezultat
-    cudaMalloc(&d_output, totalBytes);
+    CUDA_CHECK(cudaMalloc(&d_input, totalBytes));
+    CUDA_CHECK(cudaMalloc(&d_blurred, totalBytes));   // medjurezultat
+    CUDA_CHECK(cudaMalloc(&d_output, totalBytes));
 
-    cudaMemcpy(d_input, h_input, totalBytes, cudaMemcpyHostToDevice);
+    CUDA_CHECK(cudaMemcpy(d_input, h_input, totalBytes, cudaMemcpyHostToDevice));
 
     dim3 threadsPerBlock(16, 16);
     dim3 blocks(
@@ -42,14 +43,16 @@ void launchUnsharpMaskingKernel(const unsigned char* h_input, unsigned char* h_o
     );
 
     gaussKernel << <blocks, threadsPerBlock >> > (d_input, d_blurred, width, height, channels);
+    CUDA_CHECK_LAST_ERROR();
 
     unsharpKernel << <blocks, threadsPerBlock >> > (d_input, d_blurred, d_output, width, height, channels, amount);
+    CUDA_CHECK_LAST_ERROR();
 
-    cudaDeviceSynchronize();
+    CUDA_CHECK(cudaDeviceSynchronize());
 
-    cudaMemcpy(h_output, d_output, totalBytes, cudaMemcpyDeviceToHost);
+    CUDA_CHECK(cudaMemcpy(h_output, d_output, totalBytes, cudaMemcpyDeviceToHost));
 
-    cudaFree(d_input);
-    cudaFree(d_blurred);
-    cudaFree(d_output);
+    CUDA_CHECK(cudaFree(d_input));
+    CUDA_CHECK(cudaFree(d_blurred));
+    CUDA_CHECK(cudaFree(d_output));
 }

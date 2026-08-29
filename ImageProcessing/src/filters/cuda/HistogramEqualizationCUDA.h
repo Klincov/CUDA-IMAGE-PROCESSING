@@ -10,13 +10,18 @@ public:
         cv::cvtColor(input, inputGray, cv::COLOR_BGR2GRAY);
 
         cv::Mat output = inputGray.clone();
-
-        launchHistogramEqualizationKernel(
-            inputGray.data,
-            output.data,
-            input.cols,
-            input.rows
-        );
+        try {
+            launchHistogramEqualizationKernel(
+                inputGray.data,
+                output.data,
+                input.cols,
+                input.rows
+            );
+        }
+        catch (const std::exception& e) {
+            std::cerr << "Filter failed: " << e.what() << std::endl;
+            throw e;
+        }
 
         return output;
     }
