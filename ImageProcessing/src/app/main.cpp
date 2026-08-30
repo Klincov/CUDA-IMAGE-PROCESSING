@@ -32,6 +32,7 @@
 #define OUTPUT_PATH "C:\\Users\\mihaj\\OneDrive\\Desktop"
 
 void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>> &filters, cv::Mat& image);
+bool validationTest(const cv::Mat& seq, const cv::Mat& input);
 void printFilterMenu();
 void filterMenu(cv::Mat& image);
 char* browsePath();
@@ -151,13 +152,33 @@ void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>>& filte
     std::cout << "\nChoose Implementation:" << std::endl;
     std::cout << "1.Sequential" << std::endl;
     std::cout << "2.OpenMP" << std::endl;
-    std::cout << "3.CUDA" << std::endl << std::endl;
+    std::cout << "3.CUDA" << std::endl ;
+    std::cout << "4.Validation" << std::endl << std::endl;
 
     std::cout << "\nInput: " << std::endl;
     int input;
     std::cin >> input;
-    if (input < 1 || input > 3) {
+    if (input < 1 || input > 4) {
         std::cout << "Invalid input!" << std::endl;
+        return;
+    }
+
+    if (input == 4) {
+        cv::Mat seq = filters[0]->apply(image);
+        cv::Mat omp = filters[1]->apply(image);
+        cv::Mat cuda = filters[2]->apply(image);
+
+        if (!validationTest(seq,omp)) {
+            std::cout << "\nVALIDATION FAILED! OMP DOES NOT MATCH SEQUENTIAL!" << std::endl;
+            return;
+        }
+
+        if (!validationTest(seq, cuda)) {
+            std::cout << "\nVALIDATION FAILED! CUDA DOES NOT MATCH SEQUENTIAL!" << std::endl;
+            return;
+        }
+
+        std::cout << "\nVALIDATION PASSED!\n" << std::endl;
         return;
     }
 
@@ -175,6 +196,13 @@ void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>>& filte
     else return;
 
 }
+
+bool validationTest(const cv::Mat& seq, const cv::Mat& input) {
+    double diff = cv::norm(seq, input, cv::NORM_INF);
+    if (diff > 0) return false;
+    return true;
+}
+
 
 void printMenu() {
     std::cout << "Options:" << std::endl;
