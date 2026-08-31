@@ -7,6 +7,7 @@
 #include "image_io.h"
 
 #include "core/CUDATiming.cuh"
+#include "core/CUDAMaxBandwidth.cuh"
 
 #include "filters/sequential/InvertFilterSeq.h"
 #include "filters/openmp/InvertFilterOMP.h"
@@ -44,6 +45,7 @@ cv::Mat loadImage();
 
 int main()
 {
+    DisplayPeakBandwidth();
     cv::Mat loadedImage;
     cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
 
