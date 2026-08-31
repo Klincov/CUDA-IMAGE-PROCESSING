@@ -165,6 +165,13 @@ void filterMenu(cv::Mat& image) {
             std::cout << "D2H: " << result.d2hMs << std::endl;
             std::cout << "TOTAL: " << result.totalMs << std::endl << std::endl;
 
+            result = SobelFilterCUDA().applyTimed(image, output);
+            std::cout << "Sobel" << std::endl;
+            std::cout << "H2D: " << result.h2dMs << std::endl;
+            std::cout << "kernel: " << result.kernelMs << std::endl;
+            std::cout << "D2H: " << result.d2hMs << std::endl;
+            std::cout << "TOTAL: " << result.totalMs << std::endl << std::endl;
+
             
             break;
         case 0:
