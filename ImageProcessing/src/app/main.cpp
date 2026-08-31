@@ -6,6 +6,8 @@
 #include "core/IFilter.h"
 #include "image_io.h"
 
+#include "core/CUDATiming.cuh"
+
 #include "filters/sequential/InvertFilterSeq.h"
 #include "filters/openmp/InvertFilterOMP.h"
 #include "filters/cuda/InvertFilterCUDA.h"
@@ -106,6 +108,9 @@ void filterMenu(cv::Mat& image) {
             std::cout << "Invalid input" << std::endl;
             continue; 
         }
+        cv::Mat output(image.size(), image.type());
+
+        CudaTimingResult result;
 
         switch (input) {
         case 1:
@@ -138,7 +143,15 @@ void filterMenu(cv::Mat& image) {
             filters.push_back(std::make_unique<HistogramEqualizationCUDA>());
             implementationChoiceMenu(filters, image);
             break;
+        case 6:
+            result = GaussianBlurFilterCUDA().applyTimed(image,output);
+            std::cout << "H2D: " << result.h2dMs << std::endl;
+            std::cout << "kernel: " << result.kernelMs << std::endl;
+            std::cout << "D2H: " << result.d2hMs << std::endl;
+            std::cout << "TOTAL: " << result.totalMs << std::endl << std::endl;
 
+            
+            break;
         case 0:
             return;
         default:
