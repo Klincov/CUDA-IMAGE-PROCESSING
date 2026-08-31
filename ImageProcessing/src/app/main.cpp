@@ -144,6 +144,13 @@ void filterMenu(cv::Mat& image) {
             implementationChoiceMenu(filters, image);
             break;
         case 6:
+            result = InvertFilterCUDA().applyTimed(image, output);
+            std::cout << "Invert" << std::endl;
+            std::cout << "H2D: " << result.h2dMs << std::endl;
+            std::cout << "kernel: " << result.kernelMs << std::endl;
+            std::cout << "D2H: " << result.d2hMs << std::endl;
+            std::cout << "TOTAL: " << result.totalMs << std::endl << std::endl;
+
             result = GaussianBlurFilterCUDA().applyTimed(image,output);
             std::cout << "Gauss" << std::endl;
             std::cout << "H2D: " << result.h2dMs << std::endl;
