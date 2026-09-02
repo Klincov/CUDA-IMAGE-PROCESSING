@@ -161,14 +161,16 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
 
         for (int imgId = 0; imgId < static_cast<int>(images.size()); imgId++) {
             const cv::Mat& image = images[imgId];
-            std::cout << "  Slika " << (imgId + 1) << "/" << images.size() << "..." << std::endl;
+            std::cout << std::endl << "------ Slika " << (imgId + 1) << "/" << images.size() << "------" << std::endl;
 
             for (const auto& entry : filterEntries) {
+                std::cout << entry.name << std::endl;
                 for (int run = 0; run < runsPerImage; run++) {
-
+                    std::cout << "Run " << run + 1 << ": ";
                     cv::Mat output;
 
                     // --- Sequential ---
+                    std::cout << "Sequential...";
                     try {
                         CpuTimingResult r = entry.seqFn(image, output);
                         csv.writeCpuRow(entry.name, "Sequential", res.name, imgId, run, r);
@@ -177,18 +179,26 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
                         std::cerr << "    FAILED (Sequential/" << entry.name << "): " << e.what() << std::endl;
                         csv.writeFailedRow(entry.name, "Sequential", res.name, imgId, run, e.what());
                     }
+                    std::cout << " Done! ";
 
                     // --- OMP ---
-                    try {
-                        CpuTimingResult r = entry.ompFn(image, output,0);
-                        csv.writeCpuRow(entry.name, "OpenMP", res.name, imgId, run, r);
+                    std::cout << "OMP ";
+                    for (const auto& threadCount : ompThreadNums) {
+                        try {
+                            std::cout << threadCount <<"...";
+                            CpuTimingResult r = entry.ompFn(image, output, threadCount);
+                            csv.writeCpuRow(entry.name, "OpenMP", res.name, imgId, run, r, threadCount);
+                        }
+                        catch (const std::exception& e) {
+                            std::cerr << "    FAILED (OpenMP/" << entry.name << "): " << e.what() << std::endl;
+                            csv.writeFailedRow(entry.name, "OpenMP", res.name, imgId, run, e.what());
+                        }
                     }
-                    catch (const std::exception& e) {
-                        std::cerr << "    FAILED (OpenMP/" << entry.name << "): " << e.what() << std::endl;
-                        csv.writeFailedRow(entry.name, "OpenMP", res.name, imgId, run, e.what());
-                    }
+                    std::cout << " Done! ";
+
 
                     // --- CUDA ---
+                    std::cout << "CUDA...";
                     try {
                         CudaTimingResult r = entry.cudaFn(image, output);
                         csv.writeCudaRow(entry.name, res.name, imgId, run, r);
@@ -197,6 +207,8 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
                         std::cerr << "    FAILED (CUDA/" << entry.name << "): " << e.what() << std::endl;
                         csv.writeFailedRow(entry.name, "CUDA", res.name, imgId, run, e.what());
                     }
+                    std::cout << " Done! " << std::endl;
+
                 }
             }
         }
