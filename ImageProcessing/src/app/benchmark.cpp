@@ -88,7 +88,7 @@ static std::vector<cv::Mat> generateTestImages(int width, int height, int count)
 struct FilterBenchmarkEntry {
     std::string name;
     std::function<CpuTimingResult(const cv::Mat&, cv::Mat&)> seqFn;
-    std::function<CpuTimingResult(const cv::Mat&, cv::Mat&)> ompFn;
+    std::function<CpuTimingResult(const cv::Mat&, cv::Mat&, const int&)> ompFn;
     std::function<CudaTimingResult(const cv::Mat&, cv::Mat&)> cudaFn;
 };
 
@@ -98,35 +98,35 @@ static std::vector<FilterBenchmarkEntry> buildFilterEntries() {
     entries.push_back({
         "Invert",
         [](const cv::Mat& in, cv::Mat& out) { return InvertFilterSeq().applyTimed(in, out); },
-        [](const cv::Mat& in, cv::Mat& out) { return InvertFilterOMP().applyTimed(in, out); },
+        [](const cv::Mat& in, cv::Mat& out, const int& num) { return InvertFilterOMP().applyTimed(in, out, num); },
         [](const cv::Mat& in, cv::Mat& out) { return InvertFilterCUDA().applyTimed(in, out); }
         });
 
     entries.push_back({
         "Gauss",
         [](const cv::Mat& in, cv::Mat& out) { return GaussianBlurFilterSeq().applyTimed(in, out); },
-        [](const cv::Mat& in, cv::Mat& out) { return GaussianBlurFilterOMP().applyTimed(in, out); },
+        [](const cv::Mat& in, cv::Mat& out, const int& num) { return GaussianBlurFilterOMP().applyTimed(in, out, num); },
         [](const cv::Mat& in, cv::Mat& out) { return GaussianBlurFilterCUDA().applyTimed(in, out); }
         });
 
     entries.push_back({
         "Sobel",
         [](const cv::Mat& in, cv::Mat& out) { return SobelFilterSeq().applyTimed(in, out); },
-        [](const cv::Mat& in, cv::Mat& out) { return SobelFilterOMP().applyTimed(in, out); },
+        [](const cv::Mat& in, cv::Mat& out, const int& num) { return SobelFilterOMP().applyTimed(in, out, num); },
         [](const cv::Mat& in, cv::Mat& out) { return SobelFilterCUDA().applyTimed(in, out); }
         });
 
     entries.push_back({
         "Unsharp",
         [](const cv::Mat& in, cv::Mat& out) { return UnsharpMaskingFilterSeq().applyTimed(in, out); },
-        [](const cv::Mat& in, cv::Mat& out) { return UnsharpMaskingFilterOMP().applyTimed(in, out); },
+        [](const cv::Mat& in, cv::Mat& out, const int& num) { return UnsharpMaskingFilterOMP().applyTimed(in, out, num); },
         [](const cv::Mat& in, cv::Mat& out) { return UnsharpMaskingFilterCUDA().applyTimed(in, out); }
         });
 
     entries.push_back({
         "HistEqual",
         [](const cv::Mat& in, cv::Mat& out) { return HistogramEqualizationSeq().applyTimed(in, out); },
-        [](const cv::Mat& in, cv::Mat& out) { return HistogramEqualizationOMP().applyTimed(in, out); },
+        [](const cv::Mat& in, cv::Mat& out, const int& num) { return HistogramEqualizationOMP().applyTimed(in, out, num); },
         [](const cv::Mat& in, cv::Mat& out) { return HistogramEqualizationCUDA().applyTimed(in, out); }
         });
 
@@ -143,6 +143,8 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
         {"1440p", 2560, 1440},
         {"2160p", 3840, 2160}
     };
+
+    std::vector<int> ompThreadNums = { 2, 4, 6, 8, 10, 12 };
 
     auto filterEntries = buildFilterEntries();
 
@@ -178,7 +180,7 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
 
                     // --- OMP ---
                     try {
-                        CpuTimingResult r = entry.ompFn(image, output);
+                        CpuTimingResult r = entry.ompFn(image, output,0);
                         csv.writeCpuRow(entry.name, "OpenMP", res.name, imgId, run, r);
                     }
                     catch (const std::exception& e) {
