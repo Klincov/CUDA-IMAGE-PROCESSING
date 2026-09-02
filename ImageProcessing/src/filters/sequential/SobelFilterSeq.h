@@ -1,15 +1,16 @@
 #pragma once
 #include "core/IFilter.h"
+#include "core/ICPUTimed.h"
+#include "core/CPUTiming.h"
 
-
-class SobelFilterSeq : public IFilter {
+class SobelFilterSeq : public IFilter, public ICPUTimed {
 public:
 
     cv::Mat apply(const cv::Mat& input) override {
 
         cv::Mat inputGray;
         cv::cvtColor(input, inputGray, cv::COLOR_BGR2GRAY);
-        cv::Mat output = inputGray.clone();
+        cv::Mat output = cv::Mat(input.size(), input.type());
 
         for (int row = 0; row < input.size().height; row++) {
             for (int column = 0; column < input.size().width; column++) {
@@ -17,6 +18,26 @@ public:
             }
         }
         return output;
+    }
+
+    CpuTimingResult applyTimed(const cv::Mat& input, cv::Mat& output, int numThreads = 0) override {
+        auto start = std::chrono::high_resolution_clock::now();
+
+        cv::Mat inputGray;
+        cv::cvtColor(input, inputGray, cv::COLOR_BGR2GRAY);
+        output.create(inputGray.size(), inputGray.type());
+
+        for (int row = 0; row < input.size().height; row++) {
+            for (int column = 0; column < input.size().width; column++) {
+                calculateNewValue(inputGray, output, column, row);
+            }
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        CpuTimingResult result;
+        result.totalMs = std::chrono::duration<double, std::milli>(end - start).count();
+
+        return result;
     }
 
     std::string name() const override { return "Sobel (Sequential)"; }
