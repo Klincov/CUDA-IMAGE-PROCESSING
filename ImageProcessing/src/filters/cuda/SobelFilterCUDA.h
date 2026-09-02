@@ -14,6 +14,7 @@ public:
 
         try{
             launchSobelFilterKernel(inputGray.data, output.data, output.cols, output.rows);
+            cv::cvtColor(output, output, cv::COLOR_GRAY2BGR);
             return output;
         }
         catch (const std::exception& e) {

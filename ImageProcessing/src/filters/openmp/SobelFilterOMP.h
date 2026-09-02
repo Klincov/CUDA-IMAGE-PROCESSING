@@ -1,15 +1,17 @@
 #pragma once
 #include "core/IFilter.h"
+#include "core/ICPUTimed.h"
+#include "core/CPUTiming.h"
 #include <omp.h>
 
-class SobelFilterOMP : public IFilter {
+class SobelFilterOMP : public IFilter, public ICPUTimed {
 public:
 
     cv::Mat apply(const cv::Mat& input) override {
 
         cv::Mat inputGray;
         cv::cvtColor(input, inputGray, cv::COLOR_BGR2GRAY);
-        cv::Mat output = inputGray.clone();
+        cv::Mat output = cv::Mat(inputGray.size(), inputGray.type());
 
         #pragma omp parallel for collapse(2) schedule(static)
         for (int row = 0; row < input.size().height; row++) {
@@ -17,7 +19,37 @@ public:
                 calculateNewValue(inputGray, output, column, row);
             }
         }
+
+        cv::cvtColor(output, output, cv::COLOR_GRAY2BGR);
+
         return output;
+    }
+
+    CpuTimingResult applyTimed(const cv::Mat& input, cv::Mat& output, int numThreads = 0) override {
+        if (numThreads > 0) {
+            omp_set_num_threads(numThreads);
+        }
+        // ako je numThreads == 0, koristi se OMP default (obicno svi dostupni)
+
+        double start = omp_get_wtime();
+        cv::Mat inputGray;
+        cv::cvtColor(input, inputGray, cv::COLOR_BGR2GRAY);
+        output.create(inputGray.size(), inputGray.type());
+
+#pragma omp parallel for collapse(2) schedule(static)
+        for (int row = 0; row < input.size().height; row++) {
+            for (int column = 0; column < input.size().width; column++) {
+                calculateNewValue(inputGray, output, column, row);
+            }
+        }
+        double end = omp_get_wtime();
+
+        CpuTimingResult result;
+        result.totalMs = (end - start) * 1000.0;
+
+        cv::cvtColor(output, output, cv::COLOR_GRAY2BGR);
+
+        return result;
     }
 
     std::string name() const override { return "Sobel (OpenMP)"; }

@@ -1,15 +1,17 @@
 #pragma once
 #include "core/IFilter.h"
+#include "core/ICPUTimed.h"
+#include "core/CPUTiming.h"
 
 #define GRAY_LEVELS 256
 
-class HistogramEqualizationOMP : public IFilter {
+class HistogramEqualizationOMP : public IFilter, public ICPUTimed {
 public:
     cv::Mat apply(const cv::Mat& input) override {
 
         cv::Mat inputGray;
         cv::cvtColor(input, inputGray, cv::COLOR_BGR2GRAY);
-        cv::Mat output = inputGray.clone();
+        cv::Mat output = cv::Mat(inputGray.size(),inputGray.type());
 
         int levelsCumSum[GRAY_LEVELS] = { 0 };
         
@@ -32,7 +34,53 @@ public:
                 output.at<uchar>(row, column) = static_cast<unsigned char>(equalized);
             }
         }
+
+        cv::cvtColor(output, output, cv::COLOR_GRAY2BGR);
+
         return output;
+    }
+
+    CpuTimingResult applyTimed(const cv::Mat& input, cv::Mat& output, int numThreads = 0) override {
+        if (numThreads > 0) {
+            omp_set_num_threads(numThreads);
+        }
+        // ako je numThreads == 0, koristi se OMP default (obicno svi dostupni)
+
+        double start = omp_get_wtime();
+
+        cv::Mat inputGray;
+        cv::cvtColor(input, inputGray, cv::COLOR_BGR2GRAY);
+        output.create(inputGray.size(), inputGray.type());
+
+        int levelsCumSum[GRAY_LEVELS] = { 0 };
+
+        CalculateCumSum(inputGray, levelsCumSum);
+
+        int cumSumMin = firstGreaterThanZero(levelsCumSum);
+
+#pragma omp parallel for
+        for (int row = 0; row < input.size().height; row++) {
+            for (int column = 0; column < input.size().width; column++) {
+
+                double equalized = round(
+                    (
+                        (1.0 * levelsCumSum[inputGray.at<uchar>(row, column)] - cumSumMin) /
+                        ((input.rows * input.cols) - cumSumMin)
+                        ) *
+                    (GRAY_LEVELS - 1)
+                );
+
+                output.at<uchar>(row, column) = static_cast<unsigned char>(equalized);
+            }
+        }
+        double end = omp_get_wtime();
+
+        CpuTimingResult result;
+        result.totalMs = (end - start) * 1000.0;
+
+        cv::cvtColor(output, output, cv::COLOR_GRAY2BGR);
+
+        return result;
     }
 
     std::string name() const override { return "Histogram Equalization (OpenMP)"; }

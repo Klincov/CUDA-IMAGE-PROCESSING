@@ -4,7 +4,6 @@
 #include "core/ICUDATimed.h"
 #include "core/CUDATiming.cuh"
 
-
 class UnsharpMaskingFilterCUDA : public IFilter, public ICUDATimed {
 public:
     cv::Mat apply(const cv::Mat& input) override {
