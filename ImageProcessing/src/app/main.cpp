@@ -37,6 +37,7 @@
 #define OUTPUT_PATH "C:\\Users\\mihaj\\OneDrive\\Desktop"
 
 void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>> &filters, cv::Mat& image);
+void filterTimedTest(const cv::Mat& input);
 bool validationTest(const cv::Mat& seq, const cv::Mat& input);
 void printFilterMenu();
 void filterMenu(cv::Mat& image);
@@ -113,12 +114,6 @@ void filterMenu(cv::Mat& image) {
             std::cout << "Invalid input" << std::endl;
             continue; 
         }
-        cv::Mat output(image.size(), image.type());
-
-        CudaTimingResult resultCUDA;
-        CpuTimingResult resultSeq;
-        CpuTimingResult resultOmp;
-
         switch (input) {
         case 1:
             filters.push_back(std::make_unique<InvertFilterSeq>());
@@ -151,72 +146,7 @@ void filterMenu(cv::Mat& image) {
             implementationChoiceMenu(filters, image);
             break;
         case 6:
-            std::cout << "-----SEQUENTIAL-----" << std::endl;
-
-            resultSeq = GaussianBlurFilterSeq().applyTimed(image, output);
-            std::cout << "Gauss" << std::endl;
-            std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
-
-            resultSeq = HistogramEqualizationSeq().applyTimed(image, output);
-            std::cout << "HistEqual" << std::endl;
-            std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
-
-            resultSeq = InvertFilterSeq().applyTimed(image, output);
-            std::cout << "Invert" << std::endl;
-            std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
-
-            resultSeq = SobelFilterSeq().applyTimed(image, output);
-            std::cout << "Sobel" << std::endl;
-            std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
-
-            resultSeq = UnsharpMaskingFilterSeq().applyTimed(image, output);
-            std::cout << "UnsharpMasking" << std::endl;
-            std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
-
-            std::cout << "-----OMP-----" << std::endl;
-
-            resultSeq = GaussianBlurFilterOMP().applyTimed(image, output);
-            std::cout << "Gauss" << std::endl;
-            std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
-
-            std::cout << "-----CUDA-----" << std::endl;
-
-
-            resultCUDA = InvertFilterCUDA().applyTimed(image, output);
-            std::cout << "Invert" << std::endl;
-            std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
-            std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
-            std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
-            std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
-
-            resultCUDA = GaussianBlurFilterCUDA().applyTimed(image,output);
-            std::cout << "Gauss" << std::endl;
-            std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
-            std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
-            std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
-            std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
-
-            resultCUDA = HistogramEqualizationCUDA().applyTimed(image, output);
-            std::cout << "HistEqual" << std::endl;
-            std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
-            std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
-            std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
-            std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
-
-            resultCUDA = SobelFilterCUDA().applyTimed(image, output);
-            std::cout << "Sobel" << std::endl;
-            std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
-            std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
-            std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
-            std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
-
-            resultCUDA = UnsharpMaskingFilterCUDA().applyTimed(image, output);
-            std::cout << "Unsharp" << std::endl;
-            std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
-            std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
-            std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
-            std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
-
+            filterTimedTest(image);
             
             break;
         case 0:
@@ -226,6 +156,86 @@ void filterMenu(cv::Mat& image) {
             break;
         }
     }
+}
+
+void filterTimedTest(const cv::Mat& image) {
+
+    cv::Mat output = cv::Mat(image.size(), image.type());
+
+    CpuTimingResult resultSeq;
+    CpuTimingResult resultOMP;
+    CudaTimingResult resultCUDA;
+
+    std::cout << "-----SEQUENTIAL-----" << std::endl;
+
+    resultSeq = GaussianBlurFilterSeq().applyTimed(image, output);
+    std::cout << "Gauss" << std::endl;
+    std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
+
+    resultSeq = HistogramEqualizationSeq().applyTimed(image, output);
+    std::cout << "HistEqual" << std::endl;
+    std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
+
+    resultSeq = InvertFilterSeq().applyTimed(image, output);
+    std::cout << "Invert" << std::endl;
+    std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
+
+    resultSeq = SobelFilterSeq().applyTimed(image, output);
+    std::cout << "Sobel" << std::endl;
+    std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
+
+    resultSeq = UnsharpMaskingFilterSeq().applyTimed(image, output);
+    std::cout << "Unsharp" << std::endl;
+    std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
+
+    std::cout << "-----OMP-----" << std::endl;
+
+    resultOMP = GaussianBlurFilterOMP().applyTimed(image, output);
+    std::cout << "Gauss" << std::endl;
+    std::cout << "TOTAL: " << resultOMP.totalMs << std::endl << std::endl;
+
+    resultOMP = HistogramEqualizationOMP().applyTimed(image, output);
+    std::cout << "HistEqual" << std::endl;
+    std::cout << "TOTAL: " << resultOMP.totalMs << std::endl << std::endl;
+
+    std::cout << "-----CUDA-----" << std::endl;
+
+
+    resultCUDA = InvertFilterCUDA().applyTimed(image, output);
+    std::cout << "Invert" << std::endl;
+    std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
+    std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
+    std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
+    std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
+
+    resultCUDA = GaussianBlurFilterCUDA().applyTimed(image, output);
+    std::cout << "Gauss" << std::endl;
+    std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
+    std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
+    std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
+    std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
+
+    resultCUDA = HistogramEqualizationCUDA().applyTimed(image, output);
+    std::cout << "HistEqual" << std::endl;
+    std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
+    std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
+    std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
+    std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
+
+    resultCUDA = SobelFilterCUDA().applyTimed(image, output);
+    std::cout << "Sobel" << std::endl;
+    std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
+    std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
+    std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
+    std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
+
+    resultCUDA = UnsharpMaskingFilterCUDA().applyTimed(image, output);
+    std::cout << "Unsharp" << std::endl;
+    std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
+    std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
+    std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
+    std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
+
 }
 
 void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>>& filters, cv::Mat& image){
