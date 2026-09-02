@@ -33,6 +33,7 @@ public:
                 output.at<uchar>(row, column) = static_cast<unsigned char>(equalized);
             }
         }
+        cv::cvtColor(output, output, cv::COLOR_GRAY2BGR);
         return output;
     }
 
@@ -66,6 +67,7 @@ public:
         auto end = std::chrono::high_resolution_clock::now();
         CpuTimingResult result;
         result.totalMs = std::chrono::duration<double, std::milli>(end - start).count();
+        cv::cvtColor(output, output, cv::COLOR_GRAY2BGR);
 
         return result;
     }

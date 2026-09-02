@@ -19,6 +19,7 @@ public:
                 input.cols,
                 input.rows
             );
+            cv::cvtColor(output, output, cv::COLOR_GRAY2BGR);
         }
         catch (const std::exception& e) {
             std::cerr << "Filter failed: " << e.what() << std::endl;

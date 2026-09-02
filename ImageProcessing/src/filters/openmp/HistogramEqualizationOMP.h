@@ -34,6 +34,9 @@ public:
                 output.at<uchar>(row, column) = static_cast<unsigned char>(equalized);
             }
         }
+
+        cv::cvtColor(output, output, cv::COLOR_GRAY2BGR);
+
         return output;
     }
 
@@ -74,6 +77,9 @@ public:
 
         CpuTimingResult result;
         result.totalMs = (end - start) * 1000.0;
+
+        cv::cvtColor(output, output, cv::COLOR_GRAY2BGR);
+
         return result;
     }
 
