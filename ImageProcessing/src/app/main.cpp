@@ -50,7 +50,9 @@ int main()
 {
     DisplayPeakBandwidth();
     DisplayMaxThreads();
-    cv::Mat loadedImage;
+    cv::Mat loadedImage(256, 256, CV_8UC3);
+    cv::randu(loadedImage, cv::Scalar(0, 0, 0), cv::Scalar(255, 255, 255));
+
     cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
 
     while (1) {
@@ -168,16 +170,16 @@ void filterTimedTest(const cv::Mat& image) {
 
     std::cout << "-----SEQUENTIAL-----" << std::endl;
 
+    resultSeq = InvertFilterSeq().applyTimed(image, output);
+    std::cout << "Invert" << std::endl;
+    std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
+
     resultSeq = GaussianBlurFilterSeq().applyTimed(image, output);
     std::cout << "Gauss" << std::endl;
     std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
 
     resultSeq = HistogramEqualizationSeq().applyTimed(image, output);
     std::cout << "HistEqual" << std::endl;
-    std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
-
-    resultSeq = InvertFilterSeq().applyTimed(image, output);
-    std::cout << "Invert" << std::endl;
     std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
 
     resultSeq = SobelFilterSeq().applyTimed(image, output);
@@ -190,6 +192,10 @@ void filterTimedTest(const cv::Mat& image) {
 
     std::cout << "-----OMP-----" << std::endl;
 
+    resultOMP = InvertFilterOMP().applyTimed(image, output);
+    std::cout << "Invert" << std::endl;
+    std::cout << "TOTAL: " << resultOMP.totalMs << std::endl << std::endl;
+
     resultOMP = GaussianBlurFilterOMP().applyTimed(image, output);
     std::cout << "Gauss" << std::endl;
     std::cout << "TOTAL: " << resultOMP.totalMs << std::endl << std::endl;
@@ -199,7 +205,6 @@ void filterTimedTest(const cv::Mat& image) {
     std::cout << "TOTAL: " << resultOMP.totalMs << std::endl << std::endl;
 
     std::cout << "-----CUDA-----" << std::endl;
-
 
     resultCUDA = InvertFilterCUDA().applyTimed(image, output);
     std::cout << "Invert" << std::endl;
