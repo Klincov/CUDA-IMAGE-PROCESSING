@@ -163,6 +163,10 @@ void filterMenu(cv::Mat& image) {
             std::cout << "Invert" << std::endl;
             std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
 
+            resultSeq = SobelFilterSeq().applyTimed(image, output);
+            std::cout << "Sobel" << std::endl;
+            std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
+
             resultCUDA = InvertFilterCUDA().applyTimed(image, output);
             std::cout << "Invert" << std::endl;
             std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
