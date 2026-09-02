@@ -7,6 +7,7 @@
 #include "image_io.h"
 
 #include "core/CUDATiming.cuh"
+#include "core/CPUTiming.h"
 #include "core/CUDAMaxBandwidth.cuh"
 
 #include "filters/sequential/InvertFilterSeq.h"
@@ -112,7 +113,9 @@ void filterMenu(cv::Mat& image) {
         }
         cv::Mat output(image.size(), image.type());
 
-        CudaTimingResult result;
+        CudaTimingResult resultCUDA;
+        CpuTimingResult resultSeq;
+        CpuTimingResult resultOmp;
 
         switch (input) {
         case 1:
@@ -146,40 +149,44 @@ void filterMenu(cv::Mat& image) {
             implementationChoiceMenu(filters, image);
             break;
         case 6:
-            result = InvertFilterCUDA().applyTimed(image, output);
-            std::cout << "Invert" << std::endl;
-            std::cout << "H2D: " << result.h2dMs << std::endl;
-            std::cout << "kernel: " << result.kernelMs << std::endl;
-            std::cout << "D2H: " << result.d2hMs << std::endl;
-            std::cout << "TOTAL: " << result.totalMs << std::endl << std::endl;
-
-            result = GaussianBlurFilterCUDA().applyTimed(image,output);
+            resultSeq = GaussianBlurFilterSeq().applyTimed(image, output);
             std::cout << "Gauss" << std::endl;
-            std::cout << "H2D: " << result.h2dMs << std::endl;
-            std::cout << "kernel: " << result.kernelMs << std::endl;
-            std::cout << "D2H: " << result.d2hMs << std::endl;
-            std::cout << "TOTAL: " << result.totalMs << std::endl << std::endl;
+            std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
 
-            result = HistogramEqualizationCUDA().applyTimed(image, output);
+            resultCUDA = InvertFilterCUDA().applyTimed(image, output);
+            std::cout << "Invert" << std::endl;
+            std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
+            std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
+            std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
+            std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
+
+            resultCUDA = GaussianBlurFilterCUDA().applyTimed(image,output);
+            std::cout << "Gauss" << std::endl;
+            std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
+            std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
+            std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
+            std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
+
+            resultCUDA = HistogramEqualizationCUDA().applyTimed(image, output);
             std::cout << "HistEqual" << std::endl;
-            std::cout << "H2D: " << result.h2dMs << std::endl;
-            std::cout << "kernel: " << result.kernelMs << std::endl;
-            std::cout << "D2H: " << result.d2hMs << std::endl;
-            std::cout << "TOTAL: " << result.totalMs << std::endl << std::endl;
+            std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
+            std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
+            std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
+            std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
 
-            result = SobelFilterCUDA().applyTimed(image, output);
+            resultCUDA = SobelFilterCUDA().applyTimed(image, output);
             std::cout << "Sobel" << std::endl;
-            std::cout << "H2D: " << result.h2dMs << std::endl;
-            std::cout << "kernel: " << result.kernelMs << std::endl;
-            std::cout << "D2H: " << result.d2hMs << std::endl;
-            std::cout << "TOTAL: " << result.totalMs << std::endl << std::endl;
+            std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
+            std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
+            std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
+            std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
 
-            result = UnsharpMaskingFilterCUDA().applyTimed(image, output);
+            resultCUDA = UnsharpMaskingFilterCUDA().applyTimed(image, output);
             std::cout << "Unsharp" << std::endl;
-            std::cout << "H2D: " << result.h2dMs << std::endl;
-            std::cout << "kernel: " << result.kernelMs << std::endl;
-            std::cout << "D2H: " << result.d2hMs << std::endl;
-            std::cout << "TOTAL: " << result.totalMs << std::endl << std::endl;
+            std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
+            std::cout << "kernel: " << resultCUDA.kernelMs << std::endl;
+            std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
+            std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
 
             
             break;
