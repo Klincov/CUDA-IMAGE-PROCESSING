@@ -33,7 +33,7 @@ class CsvWriter {
 public:
     explicit CsvWriter(const std::string& path) : file(path) {
         if (!file.is_open()) {
-            throw std::runtime_error("Ne mogu da otvorim CSV fajl za pisanje: " + path);
+            throw std::runtime_error("Can't open CSV write file: " + path);
         }
         file << "filter,implementation,resolution,image_id,run_index,"
             "h2d_ms,kernel_ms,d2h_ms,total_ms,omp_threads,status\n";
@@ -150,18 +150,18 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
 
     CsvWriter csv(csvOutputPath);
 
-    std::cout << "Pokrecem benchmark. Rezultati idu u: " << csvOutputPath << std::endl;
+    std::cout << "Starting benchmark. Results in: " << csvOutputPath << std::endl;
 
     GPUWarmUp(); // JEDNOM
 
     for (const auto& res : resolutions) {
-        std::cout << "\n=== Rezolucija: " << res.name << " (" << res.width << "x" << res.height << ") ===" << std::endl;
+        std::cout << "\n=== Resolution: " << res.name << " (" << res.width << "x" << res.height << ") ===" << std::endl;
 
         auto images = generateTestImages(res.width, res.height, imagesPerResolution);
 
         for (int imgId = 0; imgId < static_cast<int>(images.size()); imgId++) {
             const cv::Mat& image = images[imgId];
-            std::cout << std::endl << "------ Slika " << (imgId + 1) << "/" << images.size() << "------" << std::endl;
+            std::cout << std::endl << "------ Image " << (imgId + 1) << "/" << images.size() << "------" << std::endl;
 
             for (const auto& entry : filterEntries) {
                 std::cout << entry.name << std::endl;
@@ -214,7 +214,7 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
         }
     }
 
-    std::cout << "\nBenchmark zavrsen. Rezultati sacuvani u: " << csvOutputPath << std::endl;
+    std::cout << "\nBenchmark finished. Results saved in: " << csvOutputPath << std::endl;
 }
 
 void GPUWarmUp() {
