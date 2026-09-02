@@ -10,7 +10,7 @@ public:
 
         cv::Mat inputGray;
         cv::cvtColor(input, inputGray, cv::COLOR_BGR2GRAY);
-        cv::Mat output = cv::Mat(input.size(), input.type());
+        cv::Mat output = cv::Mat(inputGray.size(), inputGray.type());
 
         for (int row = 0; row < input.size().height; row++) {
             for (int column = 0; column < input.size().width; column++) {
