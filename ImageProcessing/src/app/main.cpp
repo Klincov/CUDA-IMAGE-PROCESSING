@@ -204,6 +204,10 @@ void filterTimedTest(const cv::Mat& image) {
     std::cout << "HistEqual" << std::endl;
     std::cout << "TOTAL: " << resultOMP.totalMs << std::endl << std::endl;
 
+    resultOMP = SobelFilterOMP().applyTimed(image, output);
+    std::cout << "Sobel" << std::endl;
+    std::cout << "TOTAL: " << resultOMP.totalMs << std::endl << std::endl;
+
     std::cout << "-----CUDA-----" << std::endl;
 
     resultCUDA = InvertFilterCUDA().applyTimed(image, output);
