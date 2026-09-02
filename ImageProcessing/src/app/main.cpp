@@ -9,6 +9,7 @@
 #include "core/CUDATiming.cuh"
 #include "core/CPUTiming.h"
 #include "core/CUDAMaxBandwidth.cuh"
+#include "core/OMPMaxThreads.h"
 
 #include "filters/sequential/InvertFilterSeq.h"
 #include "filters/openmp/InvertFilterOMP.h"
@@ -47,6 +48,7 @@ cv::Mat loadImage();
 int main()
 {
     DisplayPeakBandwidth();
+    DisplayMaxThreads();
     cv::Mat loadedImage;
     cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
 
@@ -170,6 +172,15 @@ void filterMenu(cv::Mat& image) {
             resultSeq = UnsharpMaskingFilterSeq().applyTimed(image, output);
             std::cout << "UnsharpMasking" << std::endl;
             std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
+
+            std::cout << "-----OMP-----" << std::endl;
+
+            resultSeq = GaussianBlurFilterOMP().applyTimed(image, output);
+            std::cout << "Gauss" << std::endl;
+            std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
+
+            std::cout << "-----CUDA-----" << std::endl;
+
 
             resultCUDA = InvertFilterCUDA().applyTimed(image, output);
             std::cout << "Invert" << std::endl;
