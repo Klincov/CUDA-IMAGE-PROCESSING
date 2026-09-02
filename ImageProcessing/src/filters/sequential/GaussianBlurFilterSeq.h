@@ -7,7 +7,7 @@ class GaussianBlurFilterSeq : public IFilter, public ICPUTimed {
 public:
     cv::Mat apply(const cv::Mat& input) override {
 
-        cv::Mat output = input.clone();
+        cv::Mat output(input.size(), input.type());
         for (int row = 0; row < input.size().height; row++) {
             for (int column = 0; column < input.size().width; column++) {
                 calculateNewRGB(input,output, column, row);

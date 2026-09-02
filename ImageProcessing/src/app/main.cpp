@@ -149,8 +149,14 @@ void filterMenu(cv::Mat& image) {
             implementationChoiceMenu(filters, image);
             break;
         case 6:
+            std::cout << "-----SEQUENTIAL-----" << std::endl;
+
             resultSeq = GaussianBlurFilterSeq().applyTimed(image, output);
             std::cout << "Gauss" << std::endl;
+            std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
+
+            resultSeq = HistogramEqualizationSeq().applyTimed(image, output);
+            std::cout << "HistEqual" << std::endl;
             std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
 
             resultCUDA = InvertFilterCUDA().applyTimed(image, output);
