@@ -38,6 +38,7 @@
 
 void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>> &filters, cv::Mat& image);
 void filterTimedTest(const cv::Mat& input);
+void GPUWarmUp();
 bool validationTest(const cv::Mat& seq, const cv::Mat& input);
 void printFilterMenu();
 void filterMenu(cv::Mat& image);
@@ -162,6 +163,7 @@ void filterMenu(cv::Mat& image) {
 
 void filterTimedTest(const cv::Mat& image) {
 
+    GPUWarmUp();
     cv::Mat output = cv::Mat(image.size(), image.type());
 
     CpuTimingResult resultSeq;
@@ -208,6 +210,10 @@ void filterTimedTest(const cv::Mat& image) {
     std::cout << "Sobel" << std::endl;
     std::cout << "TOTAL: " << resultOMP.totalMs << std::endl << std::endl;
 
+    resultOMP = UnsharpMaskingFilterOMP().applyTimed(image, output);
+    std::cout << "Unsharp" << std::endl;
+    std::cout << "TOTAL: " << resultOMP.totalMs << std::endl << std::endl;
+
     std::cout << "-----CUDA-----" << std::endl;
 
     resultCUDA = InvertFilterCUDA().applyTimed(image, output);
@@ -245,6 +251,19 @@ void filterTimedTest(const cv::Mat& image) {
     std::cout << "D2H: " << resultCUDA.d2hMs << std::endl;
     std::cout << "TOTAL: " << resultCUDA.totalMs << std::endl << std::endl;
 
+}
+
+void GPUWarmUp() {
+    std::cout << "GPU Warm up..." << std::endl << std::endl;
+    cv::Mat dummyImage(2000, 2000, CV_8UC3);
+    cv::randu(dummyImage, cv::Scalar(0, 0, 0), cv::Scalar(255, 255, 255));
+    cv::Mat dummyOut;
+    InvertFilterCUDA().applyTimed(dummyImage, dummyOut);
+    GaussianBlurFilterCUDA().applyTimed(dummyImage, dummyOut);
+    HistogramEqualizationCUDA().applyTimed(dummyImage, dummyOut);
+    SobelFilterCUDA().applyTimed(dummyImage, dummyOut);
+    UnsharpMaskingFilterCUDA().applyTimed(dummyImage, dummyOut);
+    std::cout << "DONE!" << std::endl << std::endl;
 }
 
 void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>>& filters, cv::Mat& image){
