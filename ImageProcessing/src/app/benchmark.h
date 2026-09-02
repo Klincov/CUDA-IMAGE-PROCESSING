@@ -13,3 +13,9 @@ void filterTimedTest(const cv::Mat& image);
 // Poredi dve slike piksel-po-piksel (NORM_INF razlika).
 // Vraca true ako su identicne (diff == 0).
 bool validationTest(const cv::Mat& seq, const cv::Mat& other);
+
+// Pokrece pun benchmark: svih 5 filtera x 3 implementacije x 4 rezolucije
+// x N slika x M run-ova, i upisuje rezultate u CSV fajl na datoj putanji.
+void runFullBenchmark(const std::string& csvOutputPath,
+    int imagesPerResolution = 10,
+    int runsPerImage = 5);

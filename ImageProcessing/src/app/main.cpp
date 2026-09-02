@@ -3,6 +3,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "menu.h"
+#include "benchmark.h"
 #include "file_dialog.h"
 #include "image_io.h"
 
@@ -51,6 +52,9 @@ int main()
                 if (loadedImage.size().height <= 0)
                     break;
                 filterMenu(loadedImage);
+                break;
+            case 5:
+                runFullBenchmark("C:\\Users\\mihaj\\OneDrive\\Desktop\\benchmark_results.csv", 10, 5);
                 break;
             case 0:
                 return 1;
