@@ -159,6 +159,10 @@ void filterMenu(cv::Mat& image) {
             std::cout << "HistEqual" << std::endl;
             std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
 
+            resultSeq = InvertFilterSeq().applyTimed(image, output);
+            std::cout << "Invert" << std::endl;
+            std::cout << "TOTAL: " << resultSeq.totalMs << std::endl << std::endl;
+
             resultCUDA = InvertFilterCUDA().applyTimed(image, output);
             std::cout << "Invert" << std::endl;
             std::cout << "H2D: " << resultCUDA.h2dMs << std::endl;
