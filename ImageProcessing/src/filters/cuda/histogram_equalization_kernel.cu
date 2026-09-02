@@ -32,7 +32,7 @@ __global__ void histogramKernel(const unsigned char* input, int* histogram,
 }
 
 __global__ void equalizeMapKernel(const unsigned char* input, unsigned char* output,
-    const int* cumSum, int cumSumMin, int totalPixels, int width, int height) {
+    const int* cumSum, int cumSumMin, int totalPixels, int width, int height, float scale) {
 
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -41,8 +41,8 @@ __global__ void equalizeMapKernel(const unsigned char* input, unsigned char* out
     int idx = row * width + col;
     unsigned char pixel = input[idx];
 
-    double equalized = round(
-        (1.0 * cumSum[pixel] - cumSumMin) / (totalPixels - cumSumMin) * (GRAY_LEVELS - 1)
+    float equalized = round(
+        (cumSum[pixel] - cumSumMin) * scale
     );
 
     output[idx] = static_cast<unsigned char>(equalized);
@@ -86,8 +86,9 @@ void launchHistogramEqualizationKernel(const unsigned char* h_input, unsigned ch
 
     CUDA_CHECK(cudaMemcpy(d_cumSum, h_hist, GRAY_LEVELS * sizeof(int), cudaMemcpyHostToDevice));
 
+    float scale = 1.0f * (GRAY_LEVELS - 1) / (totalPixels - cumSumMin);
     // Faza 3: mapiranje (GPU)
-    equalizeMapKernel << <blocks, threadsPerBlock >> > (d_input, d_output, d_cumSum, cumSumMin, totalPixels, width, height);
+    equalizeMapKernel << <blocks, threadsPerBlock >> > (d_input, d_output, d_cumSum, cumSumMin, totalPixels, width, height, scale);
     CUDA_CHECK_LAST_ERROR();
     CUDA_CHECK(cudaDeviceSynchronize());
 
@@ -157,7 +158,9 @@ CudaTimingResult launchHistogramEqualizationKernelTimed(const unsigned char* h_i
 
     CUDA_CHECK(cudaMemcpy(d_cumSum, h_hist, GRAY_LEVELS * sizeof(int), cudaMemcpyHostToDevice));
 
-    equalizeMapKernel << <blocks, threadsPerBlock >> > (d_input, d_output, d_cumSum, cumSumMin, totalPixels, width, height);
+    float scale = 1.0f * (GRAY_LEVELS - 1) / (totalPixels - cumSumMin);
+
+    equalizeMapKernel << <blocks, threadsPerBlock >> > (d_input, d_output, d_cumSum, cumSumMin, totalPixels, width, height, scale);
     CUDA_CHECK_LAST_ERROR();
     CUDA_CHECK(cudaDeviceSynchronize());
 
