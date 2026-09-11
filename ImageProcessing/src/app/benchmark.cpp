@@ -135,7 +135,7 @@ static std::vector<FilterBenchmarkEntry> buildFilterEntries() {
 
 struct BenchResolution { std::string name; int width; int height; };
 
-void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution, int runsPerImage) {
+void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution, int runsPerImage, bool ompScaling) {
 
     std::vector<BenchResolution> resolutions = {
         {"720p",  1280, 720},
@@ -143,8 +143,16 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
         {"1440p", 2560, 1440},
         {"2160p", 3840, 2160}
     };
+    std::vector<int> ompThreadNums;
+    if (ompScaling) {
+        ompThreadNums.push_back(2);
+        ompThreadNums.push_back(4);
+        ompThreadNums.push_back(6);
+        ompThreadNums.push_back(8);
+        ompThreadNums.push_back(10);
+    }
+    ompThreadNums.push_back(12);
 
-    std::vector<int> ompThreadNums = { 2, 4, 6, 8, 10, 12 };
 
     auto filterEntries = buildFilterEntries();
 

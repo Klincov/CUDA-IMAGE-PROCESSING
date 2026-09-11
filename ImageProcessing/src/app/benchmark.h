@@ -14,8 +14,8 @@ void filterTimedTest(const cv::Mat& image);
 // Vraca true ako su identicne (diff == 0).
 bool validationTest(const cv::Mat& seq, const cv::Mat& other);
 
-// Pokrece pun benchmark: svih 5 filtera x 3 implementacije x 4 rezolucije
-// x N slika x M run-ova, i upisuje rezultate u CSV fajl na datoj putanji.
+// Pokrece pun benchmark: x N slika x M run-ova x 6 za omp thread counts {2,4,6,8,10,12}, 
+// i upisuje rezultate u CSV fajl na datoj putanji.
 void runFullBenchmark(const std::string& csvOutputPath,
     int imagesPerResolution = 10,
-    int runsPerImage = 5);
+    int runsPerImage = 5, bool ompScaling = false);
