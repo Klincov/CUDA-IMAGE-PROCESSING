@@ -54,7 +54,7 @@ int main()
                 filterMenu(loadedImage);
                 break;
             case 5:
-                runFullBenchmark("C:\\Users\\mihaj\\OneDrive\\Desktop\\benchmark_main_10_5.csv", 10, 5, 0);
+                runFullBenchmark("C:\\Users\\mihaj\\OneDrive\\Desktop\\benchmark_main_10_5.csv", 10, 5, true);
                 break;
             case 0:
                 return 1;

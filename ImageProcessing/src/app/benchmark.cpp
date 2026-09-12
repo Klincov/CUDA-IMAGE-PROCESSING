@@ -178,16 +178,18 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
                     cv::Mat output;
 
                     // --- Sequential ---
-                    std::cout << "Sequential...";
-                    try {
-                        CpuTimingResult r = entry.seqFn(image, output);
-                        csv.writeCpuRow(entry.name, "Sequential", res.name, imgId, run, r);
+                    if (ompScaling) {
+                        std::cout << "Sequential...";
+                        try {
+                            CpuTimingResult r = entry.seqFn(image, output);
+                            csv.writeCpuRow(entry.name, "Sequential", res.name, imgId, run, r);
+                        }
+                        catch (const std::exception& e) {
+                            std::cerr << "    FAILED (Sequential/" << entry.name << "): " << e.what() << std::endl;
+                            csv.writeFailedRow(entry.name, "Sequential", res.name, imgId, run, e.what());
+                        }
+                        std::cout << " Done! ";
                     }
-                    catch (const std::exception& e) {
-                        std::cerr << "    FAILED (Sequential/" << entry.name << "): " << e.what() << std::endl;
-                        csv.writeFailedRow(entry.name, "Sequential", res.name, imgId, run, e.what());
-                    }
-                    std::cout << " Done! ";
 
                     // --- OMP ---
                     std::cout << "OMP ";
@@ -206,16 +208,18 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
 
 
                     // --- CUDA ---
-                    std::cout << "CUDA...";
-                    try {
-                        CudaTimingResult r = entry.cudaFn(image, output);
-                        csv.writeCudaRow(entry.name, res.name, imgId, run, r);
+                    if (ompScaling) {
+                        std::cout << "CUDA...";
+                        try {
+                            CudaTimingResult r = entry.cudaFn(image, output);
+                            csv.writeCudaRow(entry.name, res.name, imgId, run, r);
+                        }
+                        catch (const std::exception& e) {
+                            std::cerr << "    FAILED (CUDA/" << entry.name << "): " << e.what() << std::endl;
+                            csv.writeFailedRow(entry.name, "CUDA", res.name, imgId, run, e.what());
+                        }
+                        std::cout << " Done! " << std::endl;
                     }
-                    catch (const std::exception& e) {
-                        std::cerr << "    FAILED (CUDA/" << entry.name << "): " << e.what() << std::endl;
-                        csv.writeFailedRow(entry.name, "CUDA", res.name, imgId, run, e.what());
-                    }
-                    std::cout << " Done! " << std::endl;
 
                 }
             }
