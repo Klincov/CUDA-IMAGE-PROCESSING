@@ -96,7 +96,12 @@ void implementationChoiceMenu(const std::vector<std::unique_ptr<IFilter>>& filte
     char save = 0;
     std::cin >> save;
     if (save == 'Y' || save == 'y') {
-        cv::cvtColor(applied, image, cv::COLOR_GRAY2BGR);
+        if (applied.channels() == 1) {
+            cv::cvtColor(applied, image, cv::COLOR_GRAY2BGR);
+        }
+        else {
+            image = applied.clone();
+        }
     }
     else return;
 }
