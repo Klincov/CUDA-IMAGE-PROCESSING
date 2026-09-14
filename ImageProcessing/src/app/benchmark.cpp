@@ -137,12 +137,14 @@ struct BenchResolution { std::string name; int width; int height; };
 
 void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution, int runsPerImage, bool ompScaling) {
 
-    std::vector<BenchResolution> resolutions = {
-        {"720p",  1280, 720},
-        {"1080p", 1920, 1080},
-        {"1440p", 2560, 1440},
-        {"2160p", 3840, 2160}
+    std::vector<BenchResolution> resolutions;
+    if(!ompScaling){
+        resolutions.push_back({ "720p",  1280, 720 });
+        resolutions.push_back({ "1080p", 1920, 1080 });
+        resolutions.push_back({ "1440p", 2560, 1440 });
     };
+    resolutions.push_back({ "2160p", 3840, 2160 });
+
     std::vector<int> ompThreadNums;
     if (ompScaling) {
         ompThreadNums.push_back(2);
@@ -178,7 +180,7 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
                     cv::Mat output;
 
                     // --- Sequential ---
-                    if (ompScaling) {
+                    if (!ompScaling) {
                         std::cout << "Sequential...";
                         try {
                             CpuTimingResult r = entry.seqFn(image, output);
@@ -208,7 +210,7 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
 
 
                     // --- CUDA ---
-                    if (ompScaling) {
+                    if (!ompScaling) {
                         std::cout << "CUDA...";
                         try {
                             CudaTimingResult r = entry.cudaFn(image, output);
