@@ -135,16 +135,26 @@ static std::vector<FilterBenchmarkEntry> buildFilterEntries() {
 
 struct BenchResolution { std::string name; int width; int height; };
 
-void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution, int runsPerImage) {
+void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution, int runsPerImage, bool ompScaling) {
 
-    std::vector<BenchResolution> resolutions = {
-        {"720p",  1280, 720},
-        {"1080p", 1920, 1080},
-        {"1440p", 2560, 1440},
-        {"2160p", 3840, 2160}
+    std::vector<BenchResolution> resolutions;
+    if(!ompScaling){
+        resolutions.push_back({ "720p",  1280, 720 });
+        resolutions.push_back({ "1080p", 1920, 1080 });
+        resolutions.push_back({ "1440p", 2560, 1440 });
     };
+    resolutions.push_back({ "2160p", 3840, 2160 });
 
-    std::vector<int> ompThreadNums = { 2, 4, 6, 8, 10, 12 };
+    std::vector<int> ompThreadNums;
+    if (ompScaling) {
+        ompThreadNums.push_back(2);
+        ompThreadNums.push_back(4);
+        ompThreadNums.push_back(6);
+        ompThreadNums.push_back(8);
+        ompThreadNums.push_back(10);
+    }
+    ompThreadNums.push_back(12);
+
 
     auto filterEntries = buildFilterEntries();
 
@@ -170,16 +180,18 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
                     cv::Mat output;
 
                     // --- Sequential ---
-                    std::cout << "Sequential...";
-                    try {
-                        CpuTimingResult r = entry.seqFn(image, output);
-                        csv.writeCpuRow(entry.name, "Sequential", res.name, imgId, run, r);
+                    if (!ompScaling) {
+                        std::cout << "Sequential...";
+                        try {
+                            CpuTimingResult r = entry.seqFn(image, output);
+                            csv.writeCpuRow(entry.name, "Sequential", res.name, imgId, run, r);
+                        }
+                        catch (const std::exception& e) {
+                            std::cerr << "    FAILED (Sequential/" << entry.name << "): " << e.what() << std::endl;
+                            csv.writeFailedRow(entry.name, "Sequential", res.name, imgId, run, e.what());
+                        }
+                        std::cout << " Done! ";
                     }
-                    catch (const std::exception& e) {
-                        std::cerr << "    FAILED (Sequential/" << entry.name << "): " << e.what() << std::endl;
-                        csv.writeFailedRow(entry.name, "Sequential", res.name, imgId, run, e.what());
-                    }
-                    std::cout << " Done! ";
 
                     // --- OMP ---
                     std::cout << "OMP ";
@@ -198,16 +210,18 @@ void runFullBenchmark(const std::string& csvOutputPath, int imagesPerResolution,
 
 
                     // --- CUDA ---
-                    std::cout << "CUDA...";
-                    try {
-                        CudaTimingResult r = entry.cudaFn(image, output);
-                        csv.writeCudaRow(entry.name, res.name, imgId, run, r);
+                    if (!ompScaling) {
+                        std::cout << "CUDA...";
+                        try {
+                            CudaTimingResult r = entry.cudaFn(image, output);
+                            csv.writeCudaRow(entry.name, res.name, imgId, run, r);
+                        }
+                        catch (const std::exception& e) {
+                            std::cerr << "    FAILED (CUDA/" << entry.name << "): " << e.what() << std::endl;
+                            csv.writeFailedRow(entry.name, "CUDA", res.name, imgId, run, e.what());
+                        }
+                        std::cout << " Done! " << std::endl;
                     }
-                    catch (const std::exception& e) {
-                        std::cerr << "    FAILED (CUDA/" << entry.name << "): " << e.what() << std::endl;
-                        csv.writeFailedRow(entry.name, "CUDA", res.name, imgId, run, e.what());
-                    }
-                    std::cout << " Done! " << std::endl;
 
                 }
             }

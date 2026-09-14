@@ -1,0 +1,15 @@
+﻿ID,Estimated Speedup [%],Function Name,Demangled Name,Duration [ms],Runtime Improvement [ms],Compute Throughput [%],Memory Throughput [%],# Registers [register/thread],Grid Size,Block Size [block],Result Type
+0,25.96,invertKernel,invertKernel(unsigned..,"0,29","0,08","31,64","74,04",16,"46875,    1,    1","  256,    1,    1",Kernel: SIMT
+1,78.30,gaussKernel,gaussKernel(const..,"1,15","0,90","87,91","71,92",40,"  125,  125,    1","   16,   16,    1",Kernel: SIMT
+2,40.02,histogramKernel,histogramKernel(const..,"0,23","0,09","30,99","31,71",16,"  125,  125,    1","   16,   16,    1",Kernel: SIMT
+3,70.42,equalizeMapKernel,equalizeMapKernel..,"0,12","0,08","43,97","61,92",16,"  125,  125,    1","   16,   16,    1",Kernel: SIMT
+4,60.72,sobelKernel,sobelKernel(const..,"0,16","0,09","82,72","78,59",23,"  125,  125,    1","   16,   16,    1",Kernel: SIMT
+5,78.34,gaussKernel,gaussKernel(const..,"1,15","0,90","87,93","71,95",40,"  125,  125,    1","   16,   16,    1",Kernel: SIMT
+6,73.86,unsharpKernel,unsharpKernel..float..,"0,34","0,25","38,61","95,30",20,"  125,  125,    1","   16,   16,    1",Kernel: SIMT
+7,25.70,invertKernel,invertKernel(unsigned..,"0,60","0,15","31,56","74,30",16,"97200,    1,    1","  256,    1,    1",Kernel: SIMT
+8,76.36,gaussKernel,gaussKernel(const..,"2,36","1,80","88,51","72,84",40,"  240,  135,    1","   16,   16,    1",Kernel: SIMT
+9,33.60,histogramKernel,histogramKernel(const..,"0,47","0,16","31,23","31,80",16,"  240,  135,    1","   16,   16,    1",Kernel: SIMT
+10,38.67,equalizeMapKernel,equalizeMapKernel..,"0,24","0,09","43,53","61,33",16,"  240,  135,    1","   16,   16,    1",Kernel: SIMT
+11,60.98,sobelKernel,sobelKernel(const..,"0,33","0,20","81,24","77,82",23,"  240,  135,    1","   16,   16,    1",Kernel: SIMT
+12,76.19,gaussKernel,gaussKernel(const..,"2,36","1,80","88,52","72,85",40,"  240,  135,    1","   16,   16,    1",Kernel: SIMT
+13,74.51,unsharpKernel,unsharpKernel..float..,"0,71","0,53","38,40","95,59",20,"  240,  135,    1","   16,   16,    1",Kernel: SIMT

@@ -26,6 +26,7 @@ public:
             omp_set_num_threads(numThreads);
         }
         // ako je numThreads == 0, koristi se OMP default (obicno svi dostupni)
+        output.create(input.size(), input.type());
 
         double start = omp_get_wtime();
 #pragma omp parallel for collapse(2) schedule(static)
